@@ -18,7 +18,8 @@
         'altura' => '',
         'cor' => '',
         'tipos' => [],
-        'regiao' => ''
+        'regiao' => '',
+        'imagem' => ''
         ];
 
         //receber os dados do formulário
@@ -30,6 +31,7 @@
             $cor = isset($_POST["cor"]) ? trim($_POST["cor"]) : "";
             $tipos = isset($_POST["tipos"]) && is_array($_POST["tipos"]) ? $_POST["tipos"] : [];
             $regiao = isset($_POST["regiao"]) && $_POST["regiao"] !== "" ? $_POST["regiao"] : NULL;
+            $imagem = isset($_POST["imagem"]) ? trim($_POST["imagem"]) : "";
 
             // Preservar dados para o formulário
             $dadosForm['nome'] = $nome;
@@ -38,6 +40,7 @@
             $dadosForm['cor'] = $cor;
             $dadosForm['tipos'] = $tipos;
             $dadosForm['regiao'] = $regiao;
+            $dadosForm['imagem'] = $imagem;
 
             // Validações básicas antes de criar o objeto
             $peso = ($peso !== NULL && is_numeric($peso)) ? (float)$peso : NULL;
@@ -58,6 +61,7 @@
             $pokemon->setPeso($peso);
             $pokemon->setAltura($altura);
             $pokemon->setCor($cor !== "" ? $cor : NULL);
+            $pokemon->setImagem($imagem !== "" ? $imagem : NULL);
 
             // Adicionar tipos
             if(count($tiposValidos) > 0) {

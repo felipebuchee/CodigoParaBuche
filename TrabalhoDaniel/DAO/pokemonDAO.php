@@ -20,12 +20,13 @@ class PokemonDAO
         {
             $this->conexao->beginTransaction();
             
-            $sql = "INSERT INTO pokemons (nome, peso, altura, cor, id_regiao) VALUES (?,?,?,?,?)";
+            $sql = "INSERT INTO pokemons (nome, peso, altura, imagem, cor, id_regiao) VALUES (?,?,?,?,?,?)";
             $stm = $this->conexao->prepare($sql);
             $stm->execute([
                 $pokemon->getNome(), 
                 $pokemon->getPeso(), 
                 $pokemon->getAltura(), 
+                $pokemon->getImagem(),
                 $pokemon->getCor(), 
                 $pokemon->getRegiao()->getId()
             ]);
@@ -49,12 +50,13 @@ class PokemonDAO
         {
             $this->conexao->beginTransaction();
             
-            $sql = "UPDATE pokemons SET nome = ?, peso = ?, altura = ?, cor = ?, id_regiao = ? WHERE id = ?";
+            $sql = "UPDATE pokemons SET nome = ?, peso = ?, altura = ?, imagem = ?, cor = ?, id_regiao = ? WHERE id = ?";
             $stm = $this->conexao->prepare($sql);
             $stm->execute([
                 $pokemon->getNome(), 
                 $pokemon->getPeso(), 
                 $pokemon->getAltura(), 
+                $pokemon->getImagem(),
                 $pokemon->getCor(), 
                 $pokemon->getRegiao()->getId(), 
                 $pokemon->getId()
@@ -134,6 +136,13 @@ class PokemonDAO
             $pokemon->setPeso($r["peso"]);
             $pokemon->setAltura($r["altura"]);
             $pokemon->setCor($r["cor"]);
+            
+            // Mapear imagem (pode ser NULL)
+            if(isset($r["imagem"]) && !empty($r["imagem"])) {
+                $pokemon->setImagem($r["imagem"]);
+            } else {
+                $pokemon->setImagem(null);
+            }
 
             $regiao = new Regioes();
             $regiao->setId($r["id_regiao"]);

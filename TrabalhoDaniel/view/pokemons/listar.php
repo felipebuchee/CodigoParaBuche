@@ -51,6 +51,11 @@
                         </span>
                         
                         <div class="pokemon-hover-card">
+                            <?php if($pokemon->getImagem()): ?>
+                            <div class="card-image-box">
+                                <img src="<?= $pokemon->getImagem() ?>" alt="<?= $pokemon->getNome() ?>" class="card-image">
+                            </div>
+                            <?php endif; ?>
                             <div class="card-details">
                                 <h4><?= $pokemon->getNome() ?> (#<?= $pokemon->getId() ?>)</h4>
                                 <p><strong>Peso:</strong> <?= $pokemon->getPeso() ?> kg</p>

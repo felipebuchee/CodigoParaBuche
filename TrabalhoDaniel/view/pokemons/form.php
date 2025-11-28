@@ -75,6 +75,17 @@ include_once(__DIR__ . "/../include/header.php");
                 </div>
 
                 <div class="mb-3">
+                    <label for="imagem" class="form-label">URL da Imagem: <small class="text-muted">(Opcional)</small></label>
+                    <input type="url"
+                        class="form-control"
+                        id="imagem"
+                        name="imagem"
+                        placeholder="<?= ($pokemon && $pokemon->getId() && $pokemon->getImagem()) ? 'Atual: ' . $pokemon->getImagem() : 'Cole a URL da imagem do Pokémon' ?>"
+                        value="<?= isset($dadosForm) ? $dadosForm['imagem'] : ($pokemon && $pokemon->getImagem() ? $pokemon->getImagem() : '') ?>">
+                    <div class="form-text">Cole o link (URL) de uma imagem da internet. Exemplo: https://exemplo.com/imagem.png</div>
+                </div>
+
+                <div class="mb-3">
                     <label for="tipos" class="form-label">Tipos: <small class="text-muted">(Mantenha Ctrl pressionado para selecionar múltiplos)</small></label>
                     <select class="form-select" id="tipos" name="tipos[]" multiple size="6">
                         <?php foreach ($listaTipos as $tipo): ?>

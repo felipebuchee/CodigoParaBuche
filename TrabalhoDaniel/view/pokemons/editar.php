@@ -18,7 +18,8 @@ $dadosForm = [
     'altura' => '',
     'cor' => '',
     'tipos' => [],
-    'regiao' => ''
+    'regiao' => '',
+    'imagem' => ''
 ];
 
 //testa se o usuario ja clicou no gravar
@@ -49,15 +50,19 @@ if(isset($_POST['nome']))
            trim($_POST["cor"]) : 
            ($pokemonExistente ? $pokemonExistente->getCor() : "");
            
-    $tipos = isset($_POST["tipos"]) && is_array($_POST["tipos"]) && count($_POST["tipos"]) > 0 ? 
+            $tipos = isset($_POST["tipos"]) && is_array($_POST["tipos"]) && count($_POST["tipos"]) > 0 ? 
              $_POST["tipos"] : 
              ($pokemonExistente ? array_map(function($t) { return $t->getId(); }, $pokemonExistente->getTipos()) : []);
              
-    $regiao = isset($_POST["regiao"]) && $_POST["regiao"] !== "" ? 
+            $regiao = isset($_POST["regiao"]) && $_POST["regiao"] !== "" ? 
               $_POST["regiao"] : 
               ($pokemonExistente && $pokemonExistente->getRegiao() ? $pokemonExistente->getRegiao()->getId() : NULL);
+              
+            $imagem = isset($_POST["imagem"]) && trim($_POST["imagem"]) !== "" ?
+              trim($_POST["imagem"]) :
+              ($pokemonExistente && $pokemonExistente->getImagem() ? $pokemonExistente->getImagem() : "");
 
-    // Preservar dados para o formulário (usar dados submetidos ou existentes)
+            // Preservar dados para o formulário (usar dados submetidos ou existentes)
     $dadosForm['nome'] = $nome;
     $dadosForm['peso'] = $_POST["peso"] ?? ($pokemonExistente ? $pokemonExistente->getPeso() : '');
     $dadosForm['altura'] = $_POST["altura"] ?? ($pokemonExistente ? $pokemonExistente->getAltura() : '');
@@ -142,11 +147,10 @@ if(isset($_POST['nome']))
     $dadosForm['nome'] = $pokemon->getNome();
     $dadosForm['peso'] = $pokemon->getPeso();
     $dadosForm['altura'] = $pokemon->getAltura();
-    $dadosForm['cor'] = $pokemon->getCor();
-    $dadosForm['tipos'] = array_map(function($tipo) { return $tipo->getId(); }, $pokemon->getTipos());
-    $dadosForm['regiao'] = $pokemon->getRegiao() ? $pokemon->getRegiao()->getId() : '';
-}
-
-include_once(__DIR__ . "/form.php");
+            $dadosForm['cor'] = $pokemon->getCor();
+            $dadosForm['tipos'] = array_map(function($tipo) { return $tipo->getId(); }, $pokemon->getTipos());
+            $dadosForm['regiao'] = $pokemon->getRegiao() ? $pokemon->getRegiao()->getId() : '';
+            $dadosForm['imagem'] = $pokemon->getImagem() ?? '';
+        }include_once(__DIR__ . "/form.php");
 
 ?>
