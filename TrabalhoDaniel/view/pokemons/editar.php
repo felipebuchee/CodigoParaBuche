@@ -118,7 +118,7 @@ if(isset($_POST['nome']))
 
     if (! $erros) 
     {
-        header("location: Listar.php");
+        header("location: listar.php");
         exit;
     } 
     else 
@@ -149,10 +149,12 @@ if(isset($_POST['nome']))
     $dadosForm['nome'] = $pokemon->getNome();
     $dadosForm['peso'] = $pokemon->getPeso();
     $dadosForm['altura'] = $pokemon->getAltura();
-            $dadosForm['cor'] = $pokemon->getCor();
-            $dadosForm['tipos'] = array_map(function($tipo) { return $tipo->getId(); }, $pokemon->getTipos());
-            $dadosForm['regiao'] = $pokemon->getRegiao() ? $pokemon->getRegiao()->getId() : '';
-            $dadosForm['imagem'] = $pokemon->getImagem() ?? '';
-        }include_once(__DIR__ . "/form.php");
+    $dadosForm['cor'] = $pokemon->getCor();
+    $dadosForm['tipos'] = array_map(function($tipo) { return $tipo->getId(); }, $pokemon->getTipos());
+    $dadosForm['regiao'] = $pokemon->getRegiao() ? $pokemon->getRegiao()->getId() : '';
+    $dadosForm['imagem'] = $pokemon->getImagem() ?? '';
+}
+
+include_once(__DIR__ . "/form.php");
 
 ?>

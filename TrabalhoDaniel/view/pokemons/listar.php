@@ -31,7 +31,11 @@
         </select>
     </div>
 
-    <table class="table table-striped table-bordered" id="tabela-pokemons">
+    <div id="loading-pokemons" style="text-align: center; padding: 20px;">
+        <p>Carregando pokémons...</p>
+    </div>
+
+    <table class="table table-striped table-bordered" id="tabela-pokemons" style="display: none;">
         <thead>
             <tr>
                 <th>ID</th>
@@ -41,42 +45,7 @@
             </tr>
         </thead>
         <tbody id="tbody-pokemons">
-            <?php foreach ($lista as $pokemon): ?>
-                <tr data-regiao="<?= $pokemon->getRegiao()->getNome() ?>">
-                    <td><?= $pokemon->getId() ?></td>
-                    
-                    <td class="pokemon-hover-container">
-                        <span class="pokemon-name-trigger">
-                            <?= $pokemon->getNome() ?>
-                        </span>
-                        
-                        <div class="pokemon-hover-card">
-                            <?php if($pokemon->getImagem()): ?>
-                            <div class="card-image-box">
-                                <img src="<?= $pokemon->getImagem() ?>" alt="<?= $pokemon->getNome() ?>" class="card-image">
-                            </div>
-                            <?php endif; ?>
-                            <div class="card-details">
-                                <h4><?= $pokemon->getNome() ?> (#<?= $pokemon->getId() ?>)</h4>
-                                <p><strong>Peso:</strong> <?= $pokemon->getPeso() ?> kg</p>
-                                <p><strong>Altura:</strong> <?= $pokemon->getAltura() ?> m</p>
-                                <p><strong>Cor:</strong> <?= $pokemon->getCor() ?></p>
-                                <p>
-                                    <strong>Tipos:</strong> 
-                                    <?php 
-                                    $nomesTipos = array_map(function($tipo) { return $tipo->getNome(); }, $pokemon->getTipos());
-                                    echo implode(', ', $nomesTipos);
-                                    ?>
-                                </p>
-                                <p><strong>Região:</strong> <?= $pokemon->getRegiao()->getNome() ?></p>
-                            </div>
-                        </div>
-                    </td>
-                    
-                    <td><a href="editar.php?id=<?= $pokemon->getId() ?>" class="btn btn-warning">Editar</a></td>
-                    <td><a href="excluir.php?id=<?= $pokemon->getId() ?>" class="btn btn-danger" onclick="return confirm('Confirma a exclusão do <?= $pokemon->getNome() ?>?')">Excluir</a></td>
-                </tr>
-            <?php endforeach; ?>
+            <!-- Linhas serão carregadas via AJAX -->
         </tbody>
     </table>
 </main>
@@ -85,86 +54,165 @@
 
 <script>
 /**
- * FILTRO DE POKÉMONS POR REGIÃO EM TEMPO REAL
+ * Escapa caracteres HTML para prevenir XSS
+ */
+function escapeHtml(text) {
+    if (text === null || text === undefined) return '';
+    var div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+}
+
+/**
+ * CARREGA POKÉMONS VIA AJAX COM XMLHttpRequest
+ * Busca direto do banco de dados com filtro opcional por região
+ * 
+ * Como funciona:
+ * 1. Cria uma requisição XMLHttpRequest para o endpoint PHP
+ * 2. O PHP consulta o banco de dados com filtro SQL
+ * 3. Quando recebe os dados, monta as linhas da tabela dinamicamente
+ * 4. Insere o HTML gerado no tbody
+ */
+function carregarPokemons(regiaoFiltro) {
+    const loadingDiv = document.getElementById('loading-pokemons');
+    const tabela = document.getElementById('tabela-pokemons');
+    const tbody = document.getElementById('tbody-pokemons');
+    
+    // Mostrar loading
+    loadingDiv.style.display = 'block';
+    tabela.style.display = 'none';
+    
+    // Criar requisição XMLHttpRequest
+    var xhr = new XMLHttpRequest();
+    
+    // Configurar URL com filtro opcional
+    var url = '../../api/filtrarPokemons.php';
+    if (regiaoFiltro) {
+        url += '?regiao=' + encodeURIComponent(regiaoFiltro);
+    }
+    
+    // Configurar a requisição: método GET, URL, assíncrono
+    xhr.open('GET', url, true);
+    
+    // Definir o que fazer quando a requisição mudar de estado
+    xhr.onreadystatechange = function() {
+        // readyState 4 = requisição concluída
+        // status 200 = resposta OK
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    // Parse da resposta JSON
+                    var pokemons = JSON.parse(xhr.responseText);
+                    
+                    // Verificar se há pokémons
+                    if (!Array.isArray(pokemons) || pokemons.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Nenhum Pokémon encontrado.</td></tr>';
+                        loadingDiv.style.display = 'none';
+                        tabela.style.display = 'table';
+                        return;
+                    }
+                    
+                    // Renderizar pokémons
+                    renderizarPokemons(pokemons);
+                    
+                    // Ocultar loading e mostrar tabela
+                    loadingDiv.style.display = 'none';
+                    tabela.style.display = 'table';
+                    
+                } catch (e) {
+                    console.error('Erro ao processar JSON:', e);
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: red;">Erro ao processar dados.</td></tr>';
+                    loadingDiv.style.display = 'none';
+                    tabela.style.display = 'table';
+                }
+            } else {
+                // Erro na requisição
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: red;">Erro ao carregar pokémons (Status: ' + xhr.status + ').</td></tr>';
+                loadingDiv.style.display = 'none';
+                tabela.style.display = 'table';
+            }
+        }
+    };
+    
+    // Enviar a requisição
+    xhr.send();
+}
+
+/**
+ * Renderiza os pokémons na tabela
+ */
+function renderizarPokemons(pokemons) {
+    const tbody = document.getElementById('tbody-pokemons');
+    
+    // Limpar tbody
+    tbody.innerHTML = '';
+    
+    if (pokemons.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--accent-yellow);">🔍 Nenhum Pokémon encontrado com o filtro aplicado.</td></tr>';
+        return;
+    }
+    
+    // Montar HTML de cada pokémon
+    pokemons.forEach(function(pokemon) {
+        
+        var tr = document.createElement('tr');
+        tr.setAttribute('data-regiao', pokemon.regiao || '');
+        
+        // Preparar tipos
+        var tipos = (pokemon.tipos && pokemon.tipos.length) ? pokemon.tipos.join(', ') : '—';
+        
+        // Preparar imagem
+        var imgHtml = '';
+        if (pokemon.imagem) {
+            imgHtml = '<div class="card-image-box"><img src="' + escapeHtml(pokemon.imagem) + '" alt="' + escapeHtml(pokemon.nome) + '" class="card-image" onerror="this.style.display=\'none\';console.error(\'Erro ao carregar imagem:\', this.src);"></div>';
+        }
+        
+        tr.innerHTML = 
+            '<td>' + escapeHtml(pokemon.id) + '</td>' +
+            '<td class="pokemon-hover-container">' +
+                '<span class="pokemon-name-trigger">' + escapeHtml(pokemon.nome) + '</span>' +
+                '<div class="pokemon-hover-card">' +
+                    imgHtml +
+                    '<div class="card-details">' +
+                        '<h4>' + escapeHtml(pokemon.nome) + ' (#' + escapeHtml(pokemon.id) + ')</h4>' +
+                        '<p><strong>Peso:</strong> ' + escapeHtml(pokemon.peso) + ' kg</p>' +
+                        '<p><strong>Altura:</strong> ' + escapeHtml(pokemon.altura) + ' m</p>' +
+                        '<p><strong>Cor:</strong> ' + escapeHtml(pokemon.cor) + '</p>' +
+                        '<p><strong>Tipos:</strong> ' + escapeHtml(tipos) + '</p>' +
+                        '<p><strong>Região:</strong> ' + escapeHtml(pokemon.regiao) + '</p>' +
+                    '</div>' +
+                '</div>' +
+            '</td>' +
+            '<td><a href="editar.php?id=' + encodeURIComponent(pokemon.id) + '" class="btn btn-warning">Editar</a></td>' +
+            '<td><a href="excluir.php?id=' + encodeURIComponent(pokemon.id) + '" class="btn btn-danger" onclick="return confirm(\'Confirma a exclusão do ' + escapeHtml(pokemon.nome) + '?\')">Excluir</a></td>';
+        
+        tbody.appendChild(tr);
+    });
+}
+
+/**
+ * FILTRO DE POKÉMONS POR REGIÃO VIA AJAX
+ * Faz nova consulta ao banco de dados com filtro SQL
  * 
  * Como funciona:
  * 1. O usuário seleciona uma região no dropdown
- * 2. JavaScript captura essa mudança instantaneamente
- * 3. Percorre todas as linhas da tabela comparando a região
- * 4. Mostra apenas as linhas que correspondem à região selecionada
- * 5. Oculta as demais linhas (sem excluir do HTML)
- * 
- * Vantagens:
- * - Não precisa recarregar a página
- * - Não faz requisição ao servidor
- * - Rápido e responsivo
+ * 2. JavaScript faz requisição AJAX para filtrarPokemons.php
+ * 3. O PHP consulta o banco com WHERE regiao = ...
+ * 4. A tabela é atualizada com os dados filtrados
  */
 document.addEventListener('DOMContentLoaded', function() {
+    // Carregar todos os pokémons ao iniciar
+    carregarPokemons('');
+    
     // Pegar o elemento select do filtro
     const filtroRegiao = document.getElementById('filtro-regiao');
     
-    // Pegar todas as linhas (<tr>) da tabela que contêm os pokémons
-    const linhasTabela = document.querySelectorAll('#tbody-pokemons tr');
-    
     // Adicionar listener para detectar quando o usuário mudar a seleção
     filtroRegiao.addEventListener('change', function() {
-        // Pegar o valor selecionado e converter para minúsculas (facilita comparação)
-        const regiaoSelecionada = this.value.toLowerCase();
+        var regiaoSelecionada = this.value;
         
-        // Contador para saber quantos pokémons ficaram visíveis
-        let contadorVisiveis = 0;
-        
-        // Percorrer cada linha da tabela
-        linhasTabela.forEach(linha => {
-            // Pegar o atributo "data-regiao" da linha (definido no PHP)
-            const regiaoLinha = linha.getAttribute('data-regiao').toLowerCase();
-            
-            // Verificar se deve mostrar ou ocultar a linha
-            // Mostra se: "Todas as Regiões" (valor vazio) OU região corresponde
-            if (regiaoSelecionada === '' || regiaoLinha === regiaoSelecionada) {
-                linha.style.display = ''; // Mostrar linha (display padrão)
-                contadorVisiveis++; // Incrementar contador
-            } else {
-                linha.style.display = 'none'; // Ocultar linha
-            }
-        });
-        
-        // Exibir mensagem caso nenhum pokémon seja encontrado
-        mostrarMensagemFiltro(contadorVisiveis, regiaoSelecionada);
+        // Recarregar pokémons com filtro do banco de dados
+        carregarPokemons(regiaoSelecionada);
     });
 });
-
-/**
- * Exibe mensagem quando o filtro não encontra resultados
- * Cria uma linha temporária na tabela informando o usuário
- * 
- * @param {number} quantidade - Número de pokémons visíveis após filtro
- * @param {string} regiao - Nome da região filtrada
- */
-function mostrarMensagemFiltro(quantidade, regiao) {
-    // Remover mensagem anterior (se existir) para não duplicar
-    const mensagemAnterior = document.getElementById('mensagem-filtro');
-    if (mensagemAnterior) {
-        mensagemAnterior.remove();
-    }
-    
-    // Se não encontrou nenhum pokémon (quantidade = 0)
-    if (quantidade === 0) {
-        const tbody = document.getElementById('tbody-pokemons');
-        
-        // Criar uma nova linha <tr>
-        const tr = document.createElement('tr');
-        tr.id = 'mensagem-filtro'; // ID para poder remover depois
-        
-        // Inserir HTML da mensagem (colspan="4" faz ocupar todas as colunas)
-        tr.innerHTML = `
-            <td colspan="4" style="text-align: center; padding: 20px; color: var(--accent-yellow);">
-                🔍 Nenhum Pokémon encontrado na região "${regiao}"
-            </td>
-        `;
-        
-        // Adicionar a linha ao corpo da tabela
-        tbody.appendChild(tr);
-    }
-}
 </script>

@@ -9,39 +9,11 @@ error_reporting(E_ALL);
 while (ob_get_level()) ob_end_clean();
 
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
 
 require_once(__DIR__ . "/../controller/pokemonController.php");
-
-function fetchImageForPokemon($idOrName) {
-    $idOrName = urlencode($idOrName);
-    $url = "https://pokeapi.co/api/v2/pokemon/{$idOrName}";
-
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 6);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'TrabalhoPokemon/1.0');
-    $resp = curl_exec($ch);
-    $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $err = curl_error($ch);
-    curl_close($ch);
-
-    if ($resp === false || $http !== 200) {
-        error_log("PokeAPI fetch failed for {$idOrName}: HTTP {$http} {$err}");
-        return null;
-    }
-
-    $json = json_decode($resp, true);
-    if (!$json) return null;
-
-    if (!empty($json['sprites']['other']['official-artwork']['front_default'])) {
-        return $json['sprites']['other']['official-artwork']['front_default'];
-    }
-    if (!empty($json['sprites']['front_default'])) {
-        return $json['sprites']['front_default'];
-    }
-    return null;
-}
 
 try {
     $controller = new PokemonController();
@@ -56,11 +28,8 @@ try {
             }
         }
 
-        $identifier = null;
-        if (method_exists($p, 'getId') && $p->getId()) $identifier = $p->getId();
-        elseif (method_exists($p, 'getNome') && $p->getNome()) $identifier = strtolower(str_replace(' ', '-', $p->getNome()));
-
-        $imagem = $identifier ? fetchImageForPokemon($identifier) : null;
+        // Usar apenas a imagem do banco de dados
+        $imagem = method_exists($p, 'getImagem') ? $p->getImagem() : null;
 
         $data[] = [
             "id" => method_exists($p, 'getId') ? $p->getId() : null,
