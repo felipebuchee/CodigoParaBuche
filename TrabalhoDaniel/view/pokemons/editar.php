@@ -69,6 +69,7 @@ if(isset($_POST['nome']))
     $dadosForm['cor'] = $cor;
     $dadosForm['tipos'] = is_array($tipos) ? $tipos : [];
     $dadosForm['regiao'] = $regiao;
+    $dadosForm['imagem'] = $imagem;
 
     // Validações básicas antes de criar o objeto
     $peso = ($peso !== NULL && is_numeric($peso)) ? (float)$peso : NULL;
@@ -89,6 +90,7 @@ if(isset($_POST['nome']))
     $pokemon->setPeso($peso);
     $pokemon->setAltura($altura);
     $pokemon->setCor($cor !== "" ? $cor : NULL);
+    $pokemon->setImagem($imagem !== "" ? $imagem : NULL);
 
     // Adicionar tipos
     if(count($tiposValidos) > 0) {
