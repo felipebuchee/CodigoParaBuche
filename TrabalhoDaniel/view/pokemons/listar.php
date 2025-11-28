@@ -80,33 +80,51 @@
 
 <script>
 /**
- * Filtro de Pokémons por Região em tempo real
- * Quando o usuário seleciona uma região, a tabela é filtrada via JavaScript
- * sem recarregar a página
+ * FILTRO DE POKÉMONS POR REGIÃO EM TEMPO REAL
+ * 
+ * Como funciona:
+ * 1. O usuário seleciona uma região no dropdown
+ * 2. JavaScript captura essa mudança instantaneamente
+ * 3. Percorre todas as linhas da tabela comparando a região
+ * 4. Mostra apenas as linhas que correspondem à região selecionada
+ * 5. Oculta as demais linhas (sem excluir do HTML)
+ * 
+ * Vantagens:
+ * - Não precisa recarregar a página
+ * - Não faz requisição ao servidor
+ * - Rápido e responsivo
  */
 document.addEventListener('DOMContentLoaded', function() {
+    // Pegar o elemento select do filtro
     const filtroRegiao = document.getElementById('filtro-regiao');
+    
+    // Pegar todas as linhas (<tr>) da tabela que contêm os pokémons
     const linhasTabela = document.querySelectorAll('#tbody-pokemons tr');
     
-    // Listener para quando o usuário mudar a região selecionada
+    // Adicionar listener para detectar quando o usuário mudar a seleção
     filtroRegiao.addEventListener('change', function() {
+        // Pegar o valor selecionado e converter para minúsculas (facilita comparação)
         const regiaoSelecionada = this.value.toLowerCase();
+        
+        // Contador para saber quantos pokémons ficaram visíveis
         let contadorVisiveis = 0;
         
-        // Percorrer todas as linhas da tabela
+        // Percorrer cada linha da tabela
         linhasTabela.forEach(linha => {
+            // Pegar o atributo "data-regiao" da linha (definido no PHP)
             const regiaoLinha = linha.getAttribute('data-regiao').toLowerCase();
             
-            // Se "Todas as Regiões" OU a região corresponde
+            // Verificar se deve mostrar ou ocultar a linha
+            // Mostra se: "Todas as Regiões" (valor vazio) OU região corresponde
             if (regiaoSelecionada === '' || regiaoLinha === regiaoSelecionada) {
-                linha.style.display = ''; // Mostrar linha
-                contadorVisiveis++;
+                linha.style.display = ''; // Mostrar linha (display padrão)
+                contadorVisiveis++; // Incrementar contador
             } else {
                 linha.style.display = 'none'; // Ocultar linha
             }
         });
         
-        // Feedback visual caso nenhum pokémon seja encontrado
+        // Exibir mensagem caso nenhum pokémon seja encontrado
         mostrarMensagemFiltro(contadorVisiveis, regiaoSelecionada);
     });
 });
@@ -114,24 +132,33 @@ document.addEventListener('DOMContentLoaded', function() {
 /**
  * Exibe mensagem quando o filtro não encontra resultados
  * Cria uma linha temporária na tabela informando o usuário
+ * 
+ * @param {number} quantidade - Número de pokémons visíveis após filtro
+ * @param {string} regiao - Nome da região filtrada
  */
 function mostrarMensagemFiltro(quantidade, regiao) {
-    // Remove mensagem anterior se existir
+    // Remover mensagem anterior (se existir) para não duplicar
     const mensagemAnterior = document.getElementById('mensagem-filtro');
     if (mensagemAnterior) {
         mensagemAnterior.remove();
     }
     
-    // Se não encontrou nenhum pokémon
+    // Se não encontrou nenhum pokémon (quantidade = 0)
     if (quantidade === 0) {
         const tbody = document.getElementById('tbody-pokemons');
+        
+        // Criar uma nova linha <tr>
         const tr = document.createElement('tr');
-        tr.id = 'mensagem-filtro';
+        tr.id = 'mensagem-filtro'; // ID para poder remover depois
+        
+        // Inserir HTML da mensagem (colspan="4" faz ocupar todas as colunas)
         tr.innerHTML = `
             <td colspan="4" style="text-align: center; padding: 20px; color: var(--accent-yellow);">
                 🔍 Nenhum Pokémon encontrado na região "${regiao}"
             </td>
         `;
+        
+        // Adicionar a linha ao corpo da tabela
         tbody.appendChild(tr);
     }
 }
