@@ -139,8 +139,12 @@ class PokemonDAO
             $pokemon->setAltura($r["altura"]);
             $pokemon->setCor($r["cor"]);
             
-            // 🚨 CORREÇÃO: Mapear a coluna 'imagem' do BD 🚨
-            $pokemon->setImagem($r["imagem"]);
+            // 🚨 CORREÇÃO: Mapear a coluna 'imagem' do BD (se existir) 🚨
+            if(isset($r["imagem"])) {
+                $pokemon->setImagem($r["imagem"]);
+            } else {
+                $pokemon->setImagem(null);
+            }
 
             $regiao = new Regioes();
             $regiao->setId($r["id_regiao"]);
