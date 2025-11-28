@@ -190,16 +190,6 @@ function renderizarPokemons(pokemons) {
     });
 }
 
-/**
- * FILTRO DE POKÉMONS POR REGIÃO VIA AJAX
- * Faz nova consulta ao banco de dados com filtro SQL
- * 
- * Como funciona:
- * 1. O usuário seleciona uma região no dropdown
- * 2. JavaScript faz requisição AJAX para filtrarPokemons.php
- * 3. O PHP consulta o banco com WHERE regiao = ...
- * 4. A tabela é atualizada com os dados filtrados
- */
 document.addEventListener('DOMContentLoaded', function() {
     // Carregar todos os pokémons ao iniciar
     carregarPokemons('');
