@@ -2,16 +2,7 @@
 
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
-error_reporting(E_ALL);
 
-// limpador de buffers
-while (ob_get_level()) ob_end_clean();
-
-// Headers JSON e cache
-header('Content-Type: application/json; charset=utf-8');
-header('Cache-Control: no-cache, no-store, must-revalidate');
-header('Pragma: no-cache');
-header('Expires: 0');
 
 require_once(__DIR__ . "/../util/conexao.php");
 

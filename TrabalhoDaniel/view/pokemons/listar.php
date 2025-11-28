@@ -53,26 +53,7 @@
 <?php include_once(__DIR__ . "/../include/footer.php"); ?>
 
 <script>
-/**
- * Escapa caracteres HTML para prevenir XSS
- */
-function escapeHtml(text) {
-    if (text === null || text === undefined) return '';
-    var div = document.createElement('div');
-    div.textContent = String(text);
-    return div.innerHTML;
-}
 
-/**
- * CARREGA POKÉMONS VIA AJAX COM XMLHttpRequest
- * Busca direto do banco de dados com filtro opcional por região
- * 
- * Como funciona:
- * 1. Cria uma requisição XMLHttpRequest para o endpoint PHP
- * 2. O PHP consulta o banco de dados com filtro SQL
- * 3. Quando recebe os dados, monta as linhas da tabela dinamicamente
- * 4. Insere o HTML gerado no tbody
- */
 function carregarPokemons(regiaoFiltro) {
     const loadingDiv = document.getElementById('loading-pokemons');
     const tabela = document.getElementById('tabela-pokemons');
@@ -164,27 +145,27 @@ function renderizarPokemons(pokemons) {
         // Preparar imagem
         var imgHtml = '';
         if (pokemon.imagem) {
-            imgHtml = '<div class="card-image-box"><img src="' + escapeHtml(pokemon.imagem) + '" alt="' + escapeHtml(pokemon.nome) + '" class="card-image" onerror="this.style.display=\'none\';console.error(\'Erro ao carregar imagem:\', this.src);"></div>';
+            imgHtml = '<div class="card-image-box"><img src="' + pokemon.imagem + '" alt="' + pokemon.nome + '" class="card-image" onerror="this.style.display=\'none\';console.error(\'Erro ao carregar imagem:\', this.src);"></div>';
         }
         
         tr.innerHTML = 
-            '<td>' + escapeHtml(pokemon.id) + '</td>' +
+            '<td>' + pokemon.id + '</td>' +
             '<td class="pokemon-hover-container">' +
-                '<span class="pokemon-name-trigger">' + escapeHtml(pokemon.nome) + '</span>' +
+                '<span class="pokemon-name-trigger">' + pokemon.nome + '</span>' +
                 '<div class="pokemon-hover-card">' +
                     imgHtml +
                     '<div class="card-details">' +
-                        '<h4>' + escapeHtml(pokemon.nome) + ' (#' + escapeHtml(pokemon.id) + ')</h4>' +
-                        '<p><strong>Peso:</strong> ' + escapeHtml(pokemon.peso) + ' kg</p>' +
-                        '<p><strong>Altura:</strong> ' + escapeHtml(pokemon.altura) + ' m</p>' +
-                        '<p><strong>Cor:</strong> ' + escapeHtml(pokemon.cor) + '</p>' +
-                        '<p><strong>Tipos:</strong> ' + escapeHtml(tipos) + '</p>' +
-                        '<p><strong>Região:</strong> ' + escapeHtml(pokemon.regiao) + '</p>' +
+                        '<h4>' + pokemon.nome + ' (#' + pokemon.id + ')</h4>' +
+                        '<p><strong>Peso:</strong> ' + pokemon.peso + ' kg</p>' +
+                        '<p><strong>Altura:</strong> ' + pokemon.altura + ' m</p>' +
+                        '<p><strong>Cor:</strong> ' + pokemon.cor + '</p>' +
+                        '<p><strong>Tipos:</strong> ' + tipos + '</p>' +
+                        '<p><strong>Região:</strong> ' + pokemon.regiao + '</p>' +
                     '</div>' +
                 '</div>' +
             '</td>' +
             '<td><a href="editar.php?id=' + encodeURIComponent(pokemon.id) + '" class="btn btn-warning">Editar</a></td>' +
-            '<td><a href="excluir.php?id=' + encodeURIComponent(pokemon.id) + '" class="btn btn-danger" onclick="return confirm(\'Confirma a exclusão do ' + escapeHtml(pokemon.nome) + '?\')">Excluir</a></td>';
+            '<td><a href="excluir.php?id=' + encodeURIComponent(pokemon.id) + '" class="btn btn-danger" onclick="return confirm(\'Confirma a exclusão do ' + pokemon.nome + '?\')">Excluir</a></td>';
         
         tbody.appendChild(tr);
     });
