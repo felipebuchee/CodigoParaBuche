@@ -5,7 +5,7 @@
 -- com suporte a múltiplos tipos por Pokémon
 -- ====================================================================
 
-CREATE DATABASE Pokemons;
+CREATE DATABASE Pokemons3;
 
 USE Pokemons;
 

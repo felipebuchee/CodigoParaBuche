@@ -6,9 +6,9 @@ error_reporting(E_ALL);
 
 //Configurar essas variáveis de acordo com o seu ambiente
 define("DB_HOST", "localhost");
-define("DB_NAME", "Pokemons");
+define("DB_NAME", "Pokemons2");
 define("DB_USER", "root");
-define("DB_PASSWORD", "bancodedados");
+define("DB_PASSWORD", "1234");
 
 //configurações adicionais
 define("VERBOUSE", true);
