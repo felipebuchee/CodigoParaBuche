@@ -20,14 +20,12 @@ class PokemonDAO
         {
             $this->conexao->beginTransaction();
             
-            // 🚨 CORREÇÃO: Usando 'imagem' no INSERT 🚨
-            $sql = "INSERT INTO pokemons (nome, peso, altura, imagem, cor, id_regiao) VALUES (?,?,?,?,?,?)";
+            $sql = "INSERT INTO pokemons (nome, peso, altura, cor, id_regiao) VALUES (?,?,?,?,?)";
             $stm = $this->conexao->prepare($sql);
             $stm->execute([
                 $pokemon->getNome(), 
                 $pokemon->getPeso(), 
                 $pokemon->getAltura(), 
-                $pokemon->getImagem(), // Pega o valor do Model
                 $pokemon->getCor(), 
                 $pokemon->getRegiao()->getId()
             ]);
@@ -51,14 +49,12 @@ class PokemonDAO
         {
             $this->conexao->beginTransaction();
             
-            // 🚨 CORREÇÃO: Usando 'imagem' no UPDATE 🚨
-            $sql = "UPDATE pokemons SET nome = ?, peso = ?, altura = ?, imagem = ?, cor = ?, id_regiao = ? WHERE id = ?";
+            $sql = "UPDATE pokemons SET nome = ?, peso = ?, altura = ?, cor = ?, id_regiao = ? WHERE id = ?";
             $stm = $this->conexao->prepare($sql);
             $stm->execute([
                 $pokemon->getNome(), 
                 $pokemon->getPeso(), 
                 $pokemon->getAltura(), 
-                $pokemon->getImagem(), // Pega o valor do Model
                 $pokemon->getCor(), 
                 $pokemon->getRegiao()->getId(), 
                 $pokemon->getId()
@@ -138,13 +134,6 @@ class PokemonDAO
             $pokemon->setPeso($r["peso"]);
             $pokemon->setAltura($r["altura"]);
             $pokemon->setCor($r["cor"]);
-            
-            // 🚨 CORREÇÃO: Mapear a coluna 'imagem' do BD (se existir) 🚨
-            if(isset($r["imagem"])) {
-                $pokemon->setImagem($r["imagem"]);
-            } else {
-                $pokemon->setImagem(null);
-            }
 
             $regiao = new Regioes();
             $regiao->setId($r["id_regiao"]);

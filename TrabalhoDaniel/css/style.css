@@ -397,9 +397,9 @@ footer {
     background: linear-gradient(135deg, var(--bg-card) 0%, #1a1a2e 100%);
     border: 2px solid var(--primary-red);
     border-radius: 12px;
-    padding: 20px;
-    min-width: 350px;
-    max-width: 400px;
+    padding: 25px;
+    min-width: 320px;
+    max-width: 380px;
     box-shadow: 0 10px 40px rgba(255, 0, 0, 0.3);
     z-index: 999999 !important;
     opacity: 0;
@@ -412,26 +412,6 @@ footer {
 .pokemon-hover-container:hover .pokemon-hover-card {
     opacity: 1;
     visibility: visible;
-}
-
-/* Imagem do Pokémon no card */
-.card-image-box {
-    text-align: center;
-    margin-bottom: 15px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 15px;
-    border-radius: 8px;
-}
-
-.card-image {
-    max-width: 150px;
-    height: auto;
-    filter: drop-shadow(0 4px 8px rgba(255, 0, 0, 0.4));
-    transition: transform 0.3s ease;
-}
-
-.card-image:hover {
-    transform: scale(1.1);
 }
 
 /* Detalhes do card */
