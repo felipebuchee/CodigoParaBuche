@@ -13,6 +13,7 @@ class Pokemon
     public function __construct()
     {
         $this->tipos = array();
+        $this->imagem = null; // Inicializar imagem como null
     }
 
     public function getId(): int

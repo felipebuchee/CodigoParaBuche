@@ -1,8 +1,12 @@
 <?php
     require_once(__DIR__ . "/../../controller/pokemonController.php");
+    require_once(__DIR__ . "/../../controller/regioesController.php");
 
     $pokemonController = new PokemonController();
     $lista = $pokemonController->listar();
+    
+    $regioesController = new RegioesController();
+    $regioes = $regioesController->listar();
 
     include_once(__DIR__ . "/../include/header.php");
 ?>
@@ -16,7 +20,18 @@
 
     <h3>Listagem de Pokémons</h3>
 
-    <table class="table table-striped table-bordered">
+    <!-- Filtro por Região -->
+    <div class="mb-3" style="max-width: 300px;">
+        <label for="filtro-regiao" class="form-label">🔍 Filtrar por Região:</label>
+        <select class="form-select" id="filtro-regiao">
+            <option value="">Todas as Regiões</option>
+            <?php foreach ($regioes as $regiao): ?>
+                <option value="<?= $regiao->getNome() ?>"><?= $regiao->getNome() ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <table class="table table-striped table-bordered" id="tabela-pokemons">
         <thead>
             <tr>
                 <th>ID</th>
@@ -25,9 +40,9 @@
                 <th>Excluir</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="tbody-pokemons">
             <?php foreach ($lista as $pokemon): ?>
-                <tr>
+                <tr data-regiao="<?= $pokemon->getRegiao()->getNome() ?>">
                     <td><?= $pokemon->getId() ?></td>
                     
                     <td class="pokemon-hover-container">
@@ -67,66 +82,60 @@
 <?php include_once(__DIR__ . "/../include/footer.php"); ?>
 
 <script>
+/**
+ * Filtro de Pokémons por Região em tempo real
+ * Quando o usuário seleciona uma região, a tabela é filtrada via JavaScript
+ * sem recarregar a página
+ */
 document.addEventListener('DOMContentLoaded', function() {
-    // Agora 'cardBody' e 'modalElement' serão encontrados
-    const botoesVisualizar = document.querySelectorAll('.btn-visualizar');
-    const cardBody = document.getElementById('card-body');
-    const modalElement = document.getElementById('pokemonModal');
+    const filtroRegiao = document.getElementById('filtro-regiao');
+    const linhasTabela = document.querySelectorAll('#tbody-pokemons tr');
     
-    // Se estiver usando Bootstrap 5, o modal é aberto via data-bs-target no botão.
-    // Se precisar abrir manualmente (opcional): const bsModal = new bootstrap.Modal(modalElement);
-
-    botoesVisualizar.forEach(botao => {
-        botao.addEventListener('click', function() {
-
-            const pokemonId = this.getAttribute('data-id');
-
-            cardBody.innerHTML = '<div class="text-center"><p>Carregando dados do Pokémon...</p><div class="spinner-border text-primary" role="status"></div></div>';
-
-            const xhr = new XMLHttpRequest();
-            const url = '../../controller/pokemonController.php?action=getCardDetails&id=' + encodeURIComponent(pokemonId);
-
-            xhr.open('GET', url, true);
+    // Listener para quando o usuário mudar a região selecionada
+    filtroRegiao.addEventListener('change', function() {
+        const regiaoSelecionada = this.value.toLowerCase();
+        let contadorVisiveis = 0;
+        
+        // Percorrer todas as linhas da tabela
+        linhasTabela.forEach(linha => {
+            const regiaoLinha = linha.getAttribute('data-regiao').toLowerCase();
             
-            xhr.onload = function() {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    try {
-                        const data = JSON.parse(xhr.responseText);
-                        
-                        if (data && data.id) {
-                            const tipos = data.tipos.join(', ');
-                            const cardHtml = `
-                                <div class="pokemon-card-content text-center">
-                                    <h3>${data.nome} (#${data.id})</h3>
-                                    <img src="${data.urlImagem}" alt="Imagem do ${data.nome}" style="max-width: 150px; margin: 10px;">
-                                    <p><strong>Peso:</strong> ${data.peso} kg</p>
-                                    <p><strong>Altura:</strong> ${data.altura} m</p>
-                                    <p><strong>Cor:</strong> ${data.cor}</p>
-                                    <p><strong>Tipos:</strong> ${tipos}</p>
-                                    <p><strong>Região:</strong> ${data.regiao}</p>
-                                </div>
-                            `;
-                            cardBody.innerHTML = cardHtml;
-                            
-                            
-                        } else {
-                            cardBody.innerHTML = '<p class="text-danger">Erro: Dados do Pokémon inválidos ou não encontrados.</p>';
-                        }
-                    } catch (e) {
-                        cardBody.innerHTML = '<p class="text-danger">Erro ao processar a resposta do servidor (JSON inválido).</p>';
-                        console.error('JSON Parse Error:', e);
-                    }
-                } else {
-                    cardBody.innerHTML = `<p class="text-danger">Ocorreu um erro (${xhr.status}) ao buscar os detalhes do Pokémon.</p>`;
-                }
-            };
-
-            xhr.onerror = function() {
-                cardBody.innerHTML = '<p class="text-danger">Ocorreu um erro de rede durante a requisição.</p>';
-            };
-
-            xhr.send();
+            // Se "Todas as Regiões" OU a região corresponde
+            if (regiaoSelecionada === '' || regiaoLinha === regiaoSelecionada) {
+                linha.style.display = ''; // Mostrar linha
+                contadorVisiveis++;
+            } else {
+                linha.style.display = 'none'; // Ocultar linha
+            }
         });
+        
+        // Feedback visual caso nenhum pokémon seja encontrado
+        mostrarMensagemFiltro(contadorVisiveis, regiaoSelecionada);
     });
 });
+
+/**
+ * Exibe mensagem quando o filtro não encontra resultados
+ * Cria uma linha temporária na tabela informando o usuário
+ */
+function mostrarMensagemFiltro(quantidade, regiao) {
+    // Remove mensagem anterior se existir
+    const mensagemAnterior = document.getElementById('mensagem-filtro');
+    if (mensagemAnterior) {
+        mensagemAnterior.remove();
+    }
+    
+    // Se não encontrou nenhum pokémon
+    if (quantidade === 0) {
+        const tbody = document.getElementById('tbody-pokemons');
+        const tr = document.createElement('tr');
+        tr.id = 'mensagem-filtro';
+        tr.innerHTML = `
+            <td colspan="4" style="text-align: center; padding: 20px; color: var(--accent-yellow);">
+                🔍 Nenhum Pokémon encontrado na região "${regiao}"
+            </td>
+        `;
+        tbody.appendChild(tr);
+    }
+}
 </script>
