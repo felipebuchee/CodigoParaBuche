@@ -21,6 +21,11 @@ class PokemonController
         return $this->pokeDAO->listar();
     }
 
+    public function listarPorRegiao($regiao)
+    {
+        return $this->pokeDAO->listarPorRegiao($regiao);
+    }
+
     public function buscarPorId($id)
     {
         return $this->pokeDAO->buscarPorId($id);
@@ -39,7 +44,6 @@ class PokemonController
                 'altura' => $pokemon->getAltura(),
                 'cor'    => $pokemon->getCor(),
                 
-                // 🚨 Usa o getImagem() do Model 🚨
                 'urlImagem' => $pokemon->getImagem(), 
                 
                 'tipos'  => array_map(function($tipo) { 

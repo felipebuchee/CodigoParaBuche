@@ -3,55 +3,40 @@
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 
-
-require_once(__DIR__ . "/../util/conexao.php");
+require_once(__DIR__ . "/../controller/pokemonController.php");
 
 try {
     // Pegar parâmetro de região
     $regiao = isset($_GET['regiao']) ? trim($_GET['regiao']) : '';
     
-    $conexao = Conexao::getConnection();
+    $controller = new PokemonController();
     
+    // Usar método do controller/DAO para filtrar
     if ($regiao !== '') {
-        $sql = "SELECT p.*, r.nome as nome_regiao 
-                FROM pokemons p 
-                JOIN regioes r ON r.id = p.id_regiao 
-                WHERE r.nome = :regiao
-                ORDER BY p.nome";
-        $stmt = $conexao->prepare($sql);
-        $stmt->bindValue(':regiao', $regiao, PDO::PARAM_STR);
+        $lista = $controller->listarPorRegiao($regiao);
     } else {
-        $sql = "SELECT p.*, r.nome as nome_regiao 
-                FROM pokemons p 
-                JOIN regioes r ON r.id = p.id_regiao 
-                ORDER BY p.nome";
-        $stmt = $conexao->prepare($sql);
+        $lista = $controller->listar();
     }
-    
-    $stmt->execute();
-    $pokemons = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     $data = [];
     
-    foreach ($pokemons as $p) {
-        // Buscar tipos do pokemon
-        $sqlTipos = "SELECT t.nome FROM tipos t 
-                     JOIN pokemon_tipos pt ON t.id = pt.id_tipo 
-                     WHERE pt.id_pokemon = :pokemon_id";
-        $stmtTipos = $conexao->prepare($sqlTipos);
-        $stmtTipos->bindValue(':pokemon_id', $p['id'], PDO::PARAM_INT);
-        $stmtTipos->execute();
-        $tipos = $stmtTipos->fetchAll(PDO::FETCH_COLUMN);
+    foreach ($lista as $p) {
+        $tipos = [];
+        if (method_exists($p, 'getTipos')) {
+            foreach ($p->getTipos() as $t) {
+                $tipos[] = method_exists($t, 'getNome') ? $t->getNome() : (string)$t;
+            }
+        }
         
         $data[] = [
-            "id" => $p['id'],
-            "nome" => $p['nome'],
-            "peso" => $p['peso'],
-            "altura" => $p['altura'],
-            "cor" => $p['cor'],
+            "id" => method_exists($p, 'getId') ? $p->getId() : null,
+            "nome" => method_exists($p, 'getNome') ? $p->getNome() : null,
+            "peso" => method_exists($p, 'getPeso') ? $p->getPeso() : null,
+            "altura" => method_exists($p, 'getAltura') ? $p->getAltura() : null,
+            "cor" => method_exists($p, 'getCor') ? $p->getCor() : null,
             "tipos" => $tipos,
-            "regiao" => $p['nome_regiao'],
-            "imagem" => $p['imagem']
+            "regiao" => (method_exists($p, 'getRegiao') && $p->getRegiao()) ? (method_exists($p->getRegiao(), 'getNome') ? $p->getRegiao()->getNome() : (string)$p->getRegiao()) : null,
+            "imagem" => method_exists($p, 'getImagem') ? $p->getImagem() : null
         ];
     }
     
@@ -61,4 +46,8 @@ try {
     http_response_code(500);
     error_log("Erro ao filtrar pokémons: " . $e->getMessage());
     echo json_encode(["error" => "Erro ao filtrar pokémons"]);
+} catch (Throwable $e) {
+    http_response_code(500);
+    error_log("Erro geral: " . $e->getMessage());
+    echo json_encode(["error" => "Erro interno do servidor"]);
 } 

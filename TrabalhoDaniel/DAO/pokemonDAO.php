@@ -104,6 +104,20 @@ class PokemonDAO
         return $this->mapPokemons($result);
     }
 
+    public function listarPorRegiao($regiao)
+    {
+        $sql = "SELECT p.*, r.nome as nome_regiao FROM pokemons p 
+                JOIN regioes r ON r.id = p.id_regiao 
+                WHERE r.nome = :regiao
+                ORDER BY p.nome";
+        $stm = $this->conexao->prepare($sql);
+        $stm->bindValue(':regiao', $regiao, PDO::PARAM_STR);
+        $stm->execute();
+        $result = $stm->fetchAll();
+
+        return $this->mapPokemons($result);
+    }
+
     public function buscarPorId($id)
     {
         // SELECT p.* inclui a coluna 'imagem'
