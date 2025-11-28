@@ -38,6 +38,7 @@ include_once(__DIR__ . "/../include/header.php");
                         name="nome"
                         placeholder="<?= ($pokemon && $pokemon->getId()) ? 'Atual: ' . $pokemon->getNome() : 'Digite o nome do Pokémon' ?>"
                         value="<?= isset($dadosForm) ? $dadosForm['nome'] : ($pokemon ? $pokemon->getNome() : '') ?>">
+                    <span id="feedback-nome" class=""></span>
                 </div>
 
                 <div class="mb-3">
@@ -50,6 +51,7 @@ include_once(__DIR__ . "/../include/header.php");
                         name="peso"
                         placeholder="<?= ($pokemon && $pokemon->getId()) ? 'Atual: ' . $pokemon->getPeso() . 'kg' : 'Digite o peso em kg' ?>"
                         value="<?= isset($dadosForm) ? $dadosForm['peso'] : ($pokemon ? $pokemon->getPeso() : '') ?>">
+                    <span id="feedback-peso" class=""></span>
                 </div>
 
                 <div class="mb-3">
@@ -62,6 +64,7 @@ include_once(__DIR__ . "/../include/header.php");
                         name="altura"
                         placeholder="<?= ($pokemon && $pokemon->getId()) ? 'Atual: ' . $pokemon->getAltura() . 'm' : 'Digite a altura em metros' ?>"
                         value="<?= isset($dadosForm) ? $dadosForm['altura'] : ($pokemon ? $pokemon->getAltura() : '') ?>">
+                    <span id="feedback-altura" class=""></span>
                 </div>
 
                 <div class="mb-3">
@@ -72,6 +75,7 @@ include_once(__DIR__ . "/../include/header.php");
                         name="cor"
                         placeholder="<?= ($pokemon && $pokemon->getId()) ? 'Atual: ' . $pokemon->getCor() : 'Digite a cor do Pokémon' ?>"
                         value="<?= isset($dadosForm) ? $dadosForm['cor'] : ($pokemon ? $pokemon->getCor() : '') ?>">
+                    <span id="feedback-cor" class=""></span>
                 </div>
 
                 <div class="mb-3">
@@ -90,6 +94,7 @@ include_once(__DIR__ . "/../include/header.php");
                             </option>
                         <?php endforeach; ?>
                     </select>
+                    <span id="feedback-tipos" class=""></span>
                     <div class="form-text">Selecione um ou mais tipos para este Pokémon.</div>
                 </div>
 
@@ -107,6 +112,7 @@ include_once(__DIR__ . "/../include/header.php");
                             </option>
                         <?php endforeach; ?>
                     </select>
+                    <span id="feedback-regiao" class=""></span>
                 </div>            <div class="mb-3">
                     <button type="submit" class="btn btn-success">
                         <?= ($pokemon && $pokemon->getId()) ? 'Atualizar' : 'Cadastrar' ?>

@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 define("DB_HOST", "localhost");
 define("DB_NAME", "Pokemons8");
 define("DB_USER", "root");
-define("DB_PASSWORD", "");
+define("DB_PASSWORD", "bancodedados");
 
 //configurações adicionais
 define("VERBOUSE", true);

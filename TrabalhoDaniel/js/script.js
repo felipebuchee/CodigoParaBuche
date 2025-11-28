@@ -58,3 +58,166 @@ function escapeHtml(text) {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 }
+
+
+// VALIDAÇÕES AJAX DE CAMPOS DO FORMULÁRIO
+
+
+ //debounce é uma função que atrasa a execução de uma função para evitar múltiplas chamadas
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+/**
+ * Valida um campo específico via AJAX
+ * Envia o valor para o servidor e exibe feedback visual
+ */
+function validarCampoAjax(campo, valor) {
+    const feedbackElement = document.getElementById(`feedback-${campo}`);
+    const inputElement = document.getElementById(campo);
+    
+    if (!feedbackElement || !inputElement) return;
+    
+    let formData = new FormData();
+    formData.append('campo', campo);
+    
+    // Tratamento especial para campos tipos
+    if (campo === 'tipos') {
+        const options = inputElement.selectedOptions;
+        const valores = Array.from(options).map(opt => opt.value);
+        
+        if (valores.length === 0) {
+            mostrarFeedback(feedbackElement, inputElement, false, 'Selecione pelo menos um tipo para o Pokémon!');
+            return;
+        }
+        
+        valores.forEach(v => formData.append('valor[]', v));
+    } else {
+        formData.append('valor', valor);
+    }
+    
+    // Mostrar estado de "validando"
+    feedbackElement.textContent = 'Validando...';
+    feedbackElement.className = 'feedback-validando';
+    inputElement.classList.remove('input-valido', 'input-invalido');
+    
+    // Enviar requisição AJAX para validação
+    fetch('../api/validarCampos.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        mostrarFeedback(feedbackElement, inputElement, data.valido, data.mensagem);
+    })
+    .catch(err => {
+        console.error('Erro na validação:', err);
+        feedbackElement.textContent = '';
+        feedbackElement.className = '';
+    });
+}
+
+/**
+ * Exibe feedback visual (sucesso/erro) no campo validado
+ * Altera classes CSS para mostrar cores e mensagens
+ */
+function mostrarFeedback(feedbackElement, inputElement, valido, mensagem) {
+    feedbackElement.textContent = mensagem;
+    
+    if (valido) {
+        feedbackElement.className = 'feedback-sucesso';
+        inputElement.classList.remove('input-invalido');
+        inputElement.classList.add('input-valido');
+    } else {
+        feedbackElement.className = 'feedback-erro';
+        inputElement.classList.remove('input-valido');
+        inputElement.classList.add('input-invalido');
+    }
+}
+
+const validarNomeDebounce = debounce((valor) => validarCampoAjax('nome', valor), 500);
+const validarPesoDebounce = debounce((valor) => validarCampoAjax('peso', valor), 500);
+const validarAlturaDebounce = debounce((valor) => validarCampoAjax('altura', valor), 500);
+const validarCorDebounce = debounce((valor) => validarCampoAjax('cor', valor), 500);
+
+/**
+ * Inicializa todos os listeners de validação nos campos do formulário
+ * Adiciona eventos de 'input' (durante digitação) e 'blur' (ao sair do campo)
+ */
+function inicializarValidacoes() {
+    // Validação do nome
+    const inputNome = document.getElementById('nome');
+    if (inputNome) {
+        inputNome.addEventListener('input', (e) => {
+            validarNomeDebounce(e.target.value);
+        });
+        inputNome.addEventListener('blur', (e) => {
+            validarCampoAjax('nome', e.target.value);
+        });
+    }
+    
+    // Validação do peso
+    const inputPeso = document.getElementById('peso');
+    if (inputPeso) {
+        inputPeso.addEventListener('input', (e) => {
+            validarPesoDebounce(e.target.value);
+        });
+        inputPeso.addEventListener('blur', (e) => {
+            validarCampoAjax('peso', e.target.value);
+        });
+    }
+    
+    // Validação da altura
+    const inputAltura = document.getElementById('altura');
+    if (inputAltura) {
+        inputAltura.addEventListener('input', (e) => {
+            validarAlturaDebounce(e.target.value);
+        });
+        inputAltura.addEventListener('blur', (e) => {
+            validarCampoAjax('altura', e.target.value);
+        });
+    }
+    
+    // Validação da cor
+    const inputCor = document.getElementById('cor');
+    if (inputCor) {
+        inputCor.addEventListener('input', (e) => {
+            validarCorDebounce(e.target.value);
+        });
+        inputCor.addEventListener('blur', (e) => {
+            validarCampoAjax('cor', e.target.value);
+        });
+    }
+    
+    // Validação dos tipos (select múltiplo)
+    const selectTipos = document.getElementById('tipos');
+    if (selectTipos) {
+        selectTipos.addEventListener('change', (e) => {
+            validarCampoAjax('tipos', e.target.value);
+        });
+    }
+    
+    // Validação da região
+    const selectRegiao = document.getElementById('regiao');
+    if (selectRegiao) {
+        selectRegiao.addEventListener('change', (e) => {
+            validarCampoAjax('regiao', e.target.value);
+        });
+    }
+}
+
+// Inicializar validações quando o DOM estiver pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', inicializarValidacoes);
+} else {
+    inicializarValidacoes();
+}

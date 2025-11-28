@@ -366,3 +366,86 @@ footer {
     color: #6c757d !important;
     
 }
+
+/* ===================================== */
+/* ESTILOS PARA VALIDAÇÃO AJAX          */
+/* ===================================== */
+
+/* Feedback de validação */
+.feedback-sucesso {
+
+    color: #4caf50;
+    font-size: 0.875rem;
+    margin-top: -15px;
+    margin-bottom: 10px;
+    display: block;
+    font-weight: bold;
+    animation: fadeIn 0.3s ease;
+
+}
+
+.feedback-erro {
+
+    color: #ff7961;
+    font-size: 0.875rem;
+    margin-top: -15px;
+    margin-bottom: 10px;
+    display: block;
+    font-weight: bold;
+    animation: shake 0.4s ease;
+
+}
+
+.feedback-validando {
+
+    color: var(--accent-yellow);
+    font-size: 0.875rem;
+    margin-top: -15px;
+    margin-bottom: 10px;
+    display: block;
+    font-style: italic;
+
+}
+
+/* Estados de input */
+.input-valido {
+
+    border-color: #4caf50 !important;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2) !important;
+
+}
+
+.input-invalido {
+
+    border-color: #f44336 !important;
+    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2) !important;
+
+}
+
+/* Animações */
+@keyframes fadeIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+@keyframes shake {
+
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
+
+}
