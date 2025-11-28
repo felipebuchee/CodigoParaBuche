@@ -69,7 +69,7 @@ function carregarPokemons(regiaoFiltro) {
     // Configurar URL com filtro opcional
     var url = '../../api/filtrarPokemons.php';
     if (regiaoFiltro) {
-        url += '?regiao=' + encodeURIComponent(regiaoFiltro);
+        url += '?regiao=' + regiaoFiltro;
     }
     
     // Configurar a requisição: método GET, URL, assíncrono
