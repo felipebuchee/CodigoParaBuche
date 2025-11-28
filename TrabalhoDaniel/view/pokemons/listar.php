@@ -164,8 +164,8 @@ function renderizarPokemons(pokemons) {
                     '</div>' +
                 '</div>' +
             '</td>' +
-            '<td><a href="editar.php?id=' + encodeURIComponent(pokemon.id) + '" class="btn btn-warning">Editar</a></td>' +
-            '<td><a href="excluir.php?id=' + encodeURIComponent(pokemon.id) + '" class="btn btn-danger" onclick="return confirm(\'Confirma a exclusão do ' + pokemon.nome + '?\')">Excluir</a></td>';
+            '<td><a href="editar.php?id=' + pokemon.id + '" class="btn btn-warning">Editar</a></td>' +
+            '<td><a href="excluir.php?id=' + pokemon.id + '" class="btn btn-danger" onclick="return confirm(\'Confirma a exclusão do ' + pokemon.nome + '?\')">Excluir</a></td>';
         
         tbody.appendChild(tr);
     });
