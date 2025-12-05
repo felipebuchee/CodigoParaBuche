@@ -31,34 +31,6 @@ class PokemonController
         return $this->pokeDAO->buscarPorId($id);
     }
 
-    // 🚨 MÉTODO PARA RETORNAR JSON (AJAX) 🚨
-    public function retornarJsonPorId(int $id)
-    {
-        $pokemon = $this->pokeDAO->buscarPorId($id); 
-
-        if ($pokemon) {
-            $pokemonData = [
-                'id'     => $pokemon->getId(),
-                'nome'   => $pokemon->getNome(),
-                'peso'   => $pokemon->getPeso(),
-                'altura' => $pokemon->getAltura(),
-                'cor'    => $pokemon->getCor(),
-                
-                'urlImagem' => $pokemon->getImagem(), 
-                
-                'tipos'  => array_map(function($tipo) { 
-                    return $tipo->getNome(); 
-                }, $pokemon->getTipos()),
-                
-                'regiao' => $pokemon->getRegiao()->getNome(),
-            ];
-            
-            return $pokemonData;
-        }
-        return null;
-    }
-    // ------------------------------------
-
     public function cadastrar(Pokemon $pokemon)
     {
         $erros = $this->pokeService->validarPokemon($pokemon);
