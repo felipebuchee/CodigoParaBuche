@@ -5,7 +5,7 @@ require_once(__DIR__ . "/../DAO/pokemonDAO.php");
 require_once(__DIR__ . "/../model/pokemon.php");
 require_once(__DIR__ . "/../util/config.php"); // Necessário para VERBOUSE
 
-class PokemonController 
+class PokemonController
 {
     private PokemonDAO $pokeDAO;
     private PokemonService $pokeService;
@@ -35,18 +35,15 @@ class PokemonController
     {
         $erros = $this->pokeService->validarPokemon($pokemon);
 
-        if(count($erros)>0)
-        {
+        if (count($erros) > 0) {
             return $erros;
         }
-        
+
         $erro = $this->pokeDAO->cadastrar($pokemon);
 
-        if($erro)
-        {
+        if ($erro) {
             array_push($erros, "Erro ao salvar um pokemon!");
-            if(VERBOUSE)
-            {
+            if (VERBOUSE) {
                 array_push($erros, $erro->getMessage());
             }
         }
@@ -56,56 +53,79 @@ class PokemonController
 
     public function excluir(Pokemon $pokemon)
     {
-       $erros = array();
+        $erros = array();
 
         $erro = $this->pokeDAO->excluir($pokemon);
 
-        if($erro)
-        {
+        if ($erro) {
             array_push($erros, "Erro ao excluir um pokemon!");
-            if(VERBOUSE)
-            {
+            if (VERBOUSE) {
                 array_push($erros, $erro->getMessage());
             }
         }
 
-        return $erros; 
+        return $erros;
+    }
+
+    public function retornarJsonPorId(int $id)
+    {
+        $pokemon = $this->pokeDAO->buscarPorId($id);
+
+        if ($pokemon) {
+            $pokemonData = [
+                'id'     => $pokemon->getId(),
+                'nome'   => $pokemon->getNome(),
+                'peso'   => $pokemon->getPeso(),
+                'altura' => $pokemon->getAltura(),
+                'cor'    => $pokemon->getCor(),
+
+                'urlImagem' => $pokemon->getImagem(),
+
+                'tipos'  => array_map(function ($tipo) {
+                    return $tipo->getNome();
+                }, $pokemon->getTipos()),
+
+                'regiao' => $pokemon->getRegiao()->getNome(),
+            ];
+
+            return $pokemonData;
+        }
+        return null;
     }
 
     public function editar(Pokemon $pokemon)
     {
-       $erros = $this->pokeService->validarPokemon($pokemon);
+        $erros = $this->pokeService->validarPokemon($pokemon);
 
-        if(count($erros)>0)
-        {
+        if (count($erros) > 0) {
             return $erros;
         }
 
         $erro = $this->pokeDAO->editar($pokemon);
 
-        if($erro)
-        {
+        if ($erro) {
             array_push($erros, "Erro ao editar um pokemon!");
-            if(VERBOUSE)
-            {
+            if (VERBOUSE) {
                 array_push($erros, $erro->getMessage());
             }
         }
 
-        return $erros; 
-    }    
+        return $erros;
+    }
 }
 
+
+
 if (isset($_GET['action']) && $_GET['action'] == 'getCardDetails' && isset($_GET['id'])) {
-    
+
     $pokemonId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-    
+
     if ($pokemonId) {
         $controller = new PokemonController();
         $data = $controller->retornarJsonPorId($pokemonId);
-        
+
         header('Content-Type: application/json');
-        
+
         if ($data) {
             echo json_encode($data);
         } else {
